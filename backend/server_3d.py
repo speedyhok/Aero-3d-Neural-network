@@ -169,6 +169,12 @@ def solve_cfd_3d(req: SimulationRequest3D):
         "X-Steps-Taken": str(steps_taken)
     }
     return Response(content=data_bytes, media_type="application/octet-stream", headers=headers)
+@app.post("/api/log_error")
+def log_error(payload: dict):
+    os.makedirs("scratch", exist_ok=True)
+    with open("scratch/browser_error.log", "a") as f:
+        f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {payload.get('error')}\n")
+    return {"status": "ok"}
 
 
 

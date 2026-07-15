@@ -457,6 +457,7 @@ async function runSurrogatePredict() {
         updateSliceTexture();
     } catch (err) {
         console.error(err);
+        logBrowserError("runSurrogatePredict", err);
         showToast("Error running surrogate prediction.", "error");
     } finally {
         setLoading("surrogate", false);
@@ -511,6 +512,7 @@ async function runCFDNumerical() {
         updateSliceTexture();
     } catch (err) {
         console.error(err);
+        logBrowserError("runCFDNumerical", err);
         showToast("Error executing CFD solver.", "error");
     } finally {
         setLoading("cfd", false);
@@ -991,11 +993,21 @@ async function checkModelStatus() {
         }
     } catch (err) {
         console.error(err);
+        logBrowserError("checkModelStatus", err);
         const dot = document.getElementById("surrogateStatusDot");
         const txt = document.getElementById("surrogateStatusText");
         dot.className = "status-dot warning";
         txt.innerText = "Offline";
     }
+}
+
+function logBrowserError(context, err) {
+    const errMsg = err.stack || err.message || err.toString();
+    fetch("/api/log_error", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ error: `[${context}] ${errMsg}` })
+    }).catch(() => {});
 }
 
 function showToast(msg, type = "info") {
