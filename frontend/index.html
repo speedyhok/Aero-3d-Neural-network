@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Aero Design Accelerator | CFD Flow Visualization</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-wind wind-icon"></i>
+                <div class="logo-text">
+                    <h1>AERO<span>DECO</span></h1>
+                    <span class="logo-sub">CFD Flow Visualization</span>
+                </div>
+            </div>
+            <div class="header-status-badge">
+                <span class="status-indicator success"></span>
+                <span>Numerical Solver Live</span>
+            </div>
+        </header>
+
+        <!-- Main Body Grid Layout -->
+        <main class="app-main">
+            <!-- Sidebar: Parameters & Controls -->
+            <section class="control-panel glass-card">
+                <h2><i class="fa-solid fa-sliders"></i> Control Dashboard</h2>
+                <hr>
+
+                <!-- Input Geometry Presets -->
+                <div class="control-group">
+                    <label>Geometry Obstacle Presets</label>
+                    <div class="preset-buttons">
+                        <button class="btn btn-preset active" data-preset="cylinder"><i class="fa-solid fa-circle"></i> Cylinder</button>
+                        <button class="btn btn-preset" data-preset="airfoil"><i class="fa-solid fa-feather-pointed"></i> NACA Airfoil</button>
+                        <button class="btn btn-preset" data-preset="heatsink"><i class="fa-solid fa-square-minus"></i> Heatsink Fin</button>
+                        <button class="btn btn-preset" id="btnClearCanvas"><i class="fa-solid fa-eraser"></i> Clear</button>
+                    </div>
+                </div>
+
+                <!-- Drawing Controls -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label for="brushSize"><i class="fa-solid fa-paint-brush"></i> Brush Size</label>
+                        <span id="brushSizeVal">5 px</span>
+                    </div>
+                    <input type="range" id="brushSize" min="2" max="10" value="5" class="slider">
+                </div>
+
+                <!-- Physics Parameters -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label for="reynoldsNum"><i class="fa-solid fa-gauge-high"></i> Reynolds Number (Re)</label>
+                        <span id="reynoldsVal">100</span>
+                    </div>
+                    <input type="range" id="reynoldsNum" min="10" max="150" value="100" class="slider">
+                    <span class="slider-desc">Low Re: Laminar | High Re: Unstable/Wake Shedding</span>
+                </div>
+
+                <!-- Simulation Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="btnRunSolver" style="width: 100%;">
+                        <i class="fa-solid fa-calculator"></i> Run CFD Solver
+                    </button>
+                </div>
+            </section>
+
+            <!-- Main Render Area: Viewport Comparative Panel -->
+            <section class="render-area">
+                <!-- Row 1: Workspace Drawing and Presets -->
+                <div class="render-card workspace glass-card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-pen-ruler"></i> Design Workspace <span class="badge">120x40 Grid</span></h3>
+                        <span class="card-desc">Draw on the canvas or select a preset to begin. Red cells are obstacles.</span>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="designCanvas" width="120" height="40"></canvas>
+                    </div>
+                </div>
+
+                <!-- Row 2: Viewports Grid -->
+                <div class="viewports-single-grid">
+                    <!-- CFD Solver Viewport -->
+                    <div class="render-card glass-card">
+                        <div class="card-header">
+                            <div class="header-main">
+                                <h3><i class="fa-solid fa-calculator"></i> CFD Numerical Solver</h3>
+                                <span class="solver-timer" id="cfdTimer">--</span>
+                            </div>
+                            <div class="viz-modes">
+                                <button class="btn-viz active" data-mode="velocity">Velocity</button>
+                                <button class="btn-viz" data-mode="pressure">Pressure</button>
+                            </div>
+                        </div>
+                        <div class="viewport-canvas-container" style="height: 200px;">
+                            <canvas id="cfdCanvas" width="120" height="40"></canvas>
+                            <div class="loading-overlay" id="cfdLoading">
+                                <div class="spinner"></div>
+                                <span>Running Lattice Boltzmann simulation...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Aero Design Accelerator | 3D CFD Visualizer</title>
+    <link rel="stylesheet" href="style_3d.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="app-container">
+        <!-- Top Navigation Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-wind wind-icon"></i>
+                <div class="logo-text">
+                    <h1>AERO<span>DECO 3D</span></h1>
+                    <span class="logo-sub">3D SciML Flow Visualization & Shape Optimization</span>
+                </div>
+            </div>
+            <div class="header-status-badge">
+                <div class="status-indicator-group">
+                    <span class="status-dot success" id="surrogateStatusDot"></span>
+                    <span class="status-label">SciML: <strong id="surrogateStatusText">Checking...</strong></span>
+                </div>
+                <div class="status-indicator-group">
+                    <span class="status-dot success" id="solverStatusDot"></span>
+                    <span class="status-label">LBM Solver: <strong>Ready</strong></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Body Grid Layout -->
+        <main class="app-main">
+            <!-- Sidebar: Parameters & Controls -->
+            <section class="control-panel glass-card">
+                <h2><i class="fa-solid fa-sliders"></i> Control Dashboard</h2>
+                <hr>
+
+                <!-- Input Geometry Presets -->
+                <div class="control-group">
+                    <label>Geometry Obstacle Presets</label>
+                    <div class="preset-buttons">
+                        <button class="btn btn-preset active" data-preset="sphere"><i class="fa-solid fa-circle"></i> Sphere</button>
+                        <button class="btn btn-preset" data-preset="naca"><i class="fa-solid fa-feather-pointed"></i> NACA Wing</button>
+                        <button class="btn btn-preset" data-preset="cylinder"><i class="fa-solid fa-database"></i> Cylinder</button>
+                        <button class="btn btn-preset" data-preset="heatsink"><i class="fa-solid fa-square-minus"></i> Heat Fin</button>
+                        <button class="btn btn-preset" id="btnClearCanvas"><i class="fa-solid fa-eraser"></i> Clear</button>
+                    </div>
+                </div>
+
+                <!-- 2D Profile Extruder Workspace -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label><i class="fa-solid fa-pen-ruler"></i> 2D Extrusion Editor</label>
+                        <span class="slider-desc">Draw profile to extrude in 3D</span>
+                    </div>
+                    <div class="canvas-container-sidebar">
+                        <canvas id="designCanvas2D" width="120" height="32"></canvas>
+                    </div>
+                    <div class="design-tools">
+                        <button class="btn btn-tool active" id="toolBrush"><i class="fa-solid fa-paint-brush"></i> Draw</button>
+                        <button class="btn btn-tool" id="toolEraser"><i class="fa-solid fa-eraser"></i> Erase</button>
+                        <div class="brush-slider-inline">
+                            <label for="brushSize">Brush:</label>
+                            <input type="range" id="brushSize" min="1" max="5" value="2">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Physics Parameters -->
+                <div class="control-group">
+                    <div class="slider-header">
+                        <label for="reynoldsNum"><i class="fa-solid fa-gauge-high"></i> Reynolds Number (Re)</label>
+                        <span id="reynoldsVal">100</span>
+                    </div>
+                    <input type="range" id="reynoldsNum" min="10" max="150" value="100" class="slider">
+                    <span class="slider-desc">Low Re: Laminar | High Re: Unstable/Wake Shedding</span>
+                </div>
+
+                <div class="action-buttons-group">
+                    <button class="btn btn-primary btn-surrogate" id="btnRunSurrogate">
+                        <i class="fa-solid fa-bolt"></i> Instant SciML Predict
+                    </button>
+                    <button class="btn btn-secondary btn-cfd" id="btnRunCFD">
+                        <i class="fa-solid fa-calculator"></i> Run CFD Solver (150 steps)
+                    </button>
+                </div>
+            </section>
+
+            <!-- Main Render Area: Viewport Comparative Panel -->
+            <section class="render-area">
+                <!-- Slicing & Visualization Controls Header -->
+                <div class="render-controls glass-card">
+                    <div class="control-row">
+                        <div class="control-item">
+                            <label for="renderModeSelect"><i class="fa-solid fa-eye"></i> Render Mode:</label>
+                            <select id="renderModeSelect" class="styled-select">
+                                <option value="particles">3D Flow Streamlines</option>
+                                <option value="slice">2D Heatmap Slicing Plane</option>
+                                <option value="voxels">Solid Voxel Geometry</option>
+                            </select>
+                        </div>
+
+                        <div class="control-item slider-item" id="slicePlaneControls" style="display: none;">
+                            <label for="sliceAxisSelect"><i class="fa-solid fa-scissors"></i> Slice:</label>
+                            <select id="sliceAxisSelect" class="styled-select-short">
+                                <option value="z">Z-Plane</option>
+                                <option value="y">Y-Plane</option>
+                                <option value="x">X-Plane</option>
+                            </select>
+                            <input type="range" id="slicePlaneRange" min="0" max="31" value="16" class="slider-inline">
+                            <span id="slicePlaneValue">16</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparative 3D Viewports -->
+                <div class="viewports-3d-grid">
+                    <!-- Left: Numerical CFD Solver -->
+                    <div class="render-card glass-card">
+                        <div class="card-header">
+                            <div class="header-main">
+                                <h3><i class="fa-solid fa-computer"></i> CFD Numerical Solver</h3>
+                                <span class="solver-timer" id="cfdTimer">-- ms</span>
+                            </div>
+                        </div>
+                        <div class="viewport-canvas-container" id="cfdViewport">
+                            <div class="loading-overlay" id="cfdLoading">
+                                <div class="spinner"></div>
+                                <span id="cfdLoadingText">Ready to run LBM simulation...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: SciML Surrogate Predictor -->
+                    <div class="render-card glass-card">
+                        <div class="card-header">
+                            <div class="header-main">
+                                <h3><i class="fa-solid fa-brain"></i> SciML Neural Surrogate</h3>
+                                <span class="solver-timer" id="surrogateTimer">-- ms</span>
+                            </div>
+                        </div>
+                        <div class="viewport-canvas-container" id="surrogateViewport">
+                            <div class="loading-overlay" id="surrogateLoading">
+                                <div class="spinner"></div>
+                                <span id="surrogateLoadingText">Awaiting design geometry input...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metrics Dashboard -->
+                <div class="metrics-dashboard glass-card">
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-title"><i class="fa-solid fa-calculator"></i> CFD Solver Drag</span>
+                            <span class="metric-value" id="cfdDragVal">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-title"><i class="fa-solid fa-brain"></i> SciML Surrogate Drag</span>
+                            <span class="metric-value" id="surrogateDragVal">--</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="app_3d.js"></script>
+</body>
+</html>

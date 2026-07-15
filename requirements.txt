@@ -1,0 +1,7 @@
+numpy
+scipy
+fastapi
+uvicorn
+pydantic
+python-multipart
+torch --index-url https://download.pytorch.org/whl/cpu

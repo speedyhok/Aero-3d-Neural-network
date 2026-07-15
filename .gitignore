@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.log
+.system_generated/
+browser/
+scratch/
+walkthrough.md*
+implementation_plan.md*
+task.md*
+*.pyc
+backend.zip
