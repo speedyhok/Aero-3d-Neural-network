@@ -20,22 +20,30 @@ Evaluating aerodynamic geometries (such as wings, airfoils, and heat sinks) trad
 
 ---
 
-## Architecture & Core Features
+## The Neural Network & Rationale Behind the Surrogate Model
 
-### 1. 3D CFD Solver
-*   **Method**: Lattice Boltzmann Method (LBM) using the **D3Q19** (3-dimensions, 19 lattice velocities) collision scheme.
-*   **Outputs**: Computes physical velocity vectors and pressure fields, enforcing no-slip bounce-back conditions on solid boundary walls.
-*   **Drag Force Estimation**: Calculates viscous drag force by integrating pressure differences across the obstacle surfaces.
+### Why Choose a Surrogate Model?
+Traditional CFD numerical methods (like our D3Q19 LBM solver) are mathematically rigorous but require thousands of iterative steps to solve the Navier-Stokes equations and reach convergence. In 3D domains, this becomes extremely slow—running the solver on a standard CPU takes approximately **23 seconds** per simulation. 
 
-### 2. 3D Neural Surrogate (SciML)
-*   **Model**: 3D U-Net architecture.
-*   **Physics Constraints**: Trained offline using a combination of supervised loss and physical conservation constraints (PINN approach).
-*   **Performance**: Completes flow predictions on complex extruded profiles in milliseconds on CPU, bypassing numerical solver iteration time.
+This delay makes real-time interactive design loops impossible. The **Neural Surrogate Model** acts as an emulator of the numerical solver. Once trained offline, the surrogate can predict flow patterns in **milliseconds** (and around 2.7 seconds on a single CPU thread), enabling immediate, real-time feedback as the user draws or modifies geometries.
 
-### 3. Interactive Web Interface
-*   **2D Design Workspace**: Draw custom cross-sectional profiles directly on the design board (extruded automatically to 3D).
-*   **Preset Geometries**: Fast-load standard aerodynamic presets: Sphere, Cylinder, NACA Airfoil Wing, or Double Fin Heat Sink.
-*   **3D Streamline Viz**: Dynamic WebGL particle streams showing flow separation, velocity magnitude gradients, and pressure slices.
+### Neural Network Architecture: 3D U-Net
+The surrogate uses a **3D U-Net (`UNet3D`)** architecture. This specific model was chosen for the following reasons:
+
+1.  **Volume-to-Volume Translation**: Since both the input (voxel geometry) and the output (fluid velocity & pressure) reside on the same uniform `32x32x120` spatial grid, the problem is framed as a volumetric translation task.
+2.  **Skip Connections**: The key strength of a U-Net is its skip connections, which link corresponding levels of the downsampling (encoder) and upsampling (decoder) paths. This allows the network to bypass bottleneck layers and directly preserve fine-grained spatial information, which is critical for mapping sharp velocity gradients and boundary layers right at the obstacle's surface.
+3.  **Context and Fine Detail**: The encoder path reduces spatial dimensions to capture global context (such as the overall shape orientation and Reynolds number), while the decoder path recovers the local details (like wake turbulence and flow separation behind the object).
+
+#### Model Input / Output Specifications:
+
+*   **Inputs (Shape: `[1, 2, 32, 32, 120]`)**:
+    *   **Channel 0**: The 3D binary voxel mask of the design shape ($1$ representing solid, $0$ representing fluid).
+    *   **Channel 1**: The normalized Reynolds number ($Re / 150.0$) broadcasted/tiled across the entire 3D grid.
+*   **Outputs (Shape: `[1, 4, 32, 32, 120]`)**:
+    *   **Channel 0**: $u$ velocity component (along flow direction).
+    *   **Channel 1**: $v$ velocity component (vertical direction).
+    *   **Channel 2**: $w$ velocity component (spanwise direction).
+    *   **Channel 3**: $p$ gauge pressure field.
 
 ---
 
@@ -64,25 +72,6 @@ uvicorn backend.server_3d:app --host 127.0.0.1 --port 8000
 ```
 Open your browser and navigate to:
 `http://127.0.0.1:8000/index_3d.html`
-
----
-
-## Deployment to Render.com (Web Service)
-
-This application is ready to be hosted as a **Web Service** on Render.
-
-1.  Push the code to a GitHub repository.
-2.  Create a **New Web Service** on Render connected to your GitHub repository.
-3.  Use the following configuration details in the Render settings panel:
-
-| Setting | Value |
-| :--- | :--- |
-| **Runtime** | `Python` |
-| **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `uvicorn backend.server_3d:app --host 0.0.0.0 --port $PORT` |
-
-Once deployed, visit your Web Service URL appending `/index_3d.html`:
-`https://<your-subdomain>.onrender.com/index_3d.html`
 
 ---
 
