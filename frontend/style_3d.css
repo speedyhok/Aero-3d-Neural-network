@@ -105,6 +105,30 @@ body {
     text-transform: uppercase;
 }
 
+/* Developer Info */
+.header-developer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+.dev-name {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+.dev-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.dev-link:hover {
+    color: var(--neon-cyan);
+}
+
 /* Status Badges */
 .header-status-badge {
     display: flex;

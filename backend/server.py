@@ -1,3 +1,9 @@
+# ==========================================
+# Developer: Mohibul Hoque
+# Email: hokworks@gmail.com
+# LinkedIn: linkedin.com/in/speedymohibul
+# ==========================================
+
 import os
 import numpy as np
 from fastapi import FastAPI, HTTPException

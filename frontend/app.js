@@ -1,3 +1,9 @@
+// ==========================================
+// Developer: Mohibul Hoque
+// Email: hokworks@gmail.com
+// LinkedIn: linkedin.com/in/speedymohibul
+// ==========================================
+
 // CFD Flow Visualization Frontend Application Logic
 
 // Grid coordinates

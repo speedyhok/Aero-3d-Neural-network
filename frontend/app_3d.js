@@ -1,3 +1,9 @@
+// ==========================================
+// Developer: Mohibul Hoque
+// Email: hokworks@gmail.com
+// LinkedIn: linkedin.com/in/speedymohibul
+// ==========================================
+
 // ----------------------------------------------------
 // AERO-DECO 3D: WebGL Core App Logic
 // ----------------------------------------------------

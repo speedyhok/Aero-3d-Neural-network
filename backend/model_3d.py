@@ -1,3 +1,9 @@
+# ==========================================
+# Developer: Mohibul Hoque
+# Email: hokworks@gmail.com
+# LinkedIn: linkedin.com/in/speedymohibul
+# ==========================================
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
